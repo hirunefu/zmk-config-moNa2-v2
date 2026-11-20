@@ -20,12 +20,18 @@ DYA Studio は ZMK Studio をベースに、
 
 [keymap-drawer YAML](keymap-drawer/mona2.yaml) / [SVGを開く](keymap-drawer/mona2.svg)
 
+このフォークのキーマップは roBa（[hirunefu/zmk-config-roBa](https://github.com/hirunefu/zmk-config-roBa)）に合わせています。レイヤーは `0 BASE`〜`7 OS` の 8 枚で、トラックボールの動き（オートマウスでレイヤー 4、LANG1 長押しでスクロール、SPACE 長押しで 1/3 の速さ）も roBa に合わせています。roBa との違いは次のとおりです。
+
+- moNa2 は 42 キーで、roBa の左手内側 2 段目のキー（ESC）の位置にノブがあります。ESC は LANG1 長押し＋内側の TAB キーに移し、NUM レイヤーの同じ位置にあった Ctrl+Alt+0 は外しました。
+- ノブは、ふだんは画面の拡大・縮小（Ctrl＋ホイール）、LANG1 長押し中はタブ切り替えです。割り当ては DYA Studio でレイヤーごとに変えられます。
+- roBa にある慣性スクロール・ポインタ加速・OS 別の既定レイヤー・実行時マクロは入れていません（ZMK とモジュールの版が古く、使えないものもあります）。
+
 ## DYA Studio の使い方
 
 1. 本リポジトリをビルドし、生成された `mona2_r-...uf2`（中央側＝右手）と `mona2_l-...uf2`（周辺側＝左手）をそれぞれの XIAO BLE に書き込みます。
 2. 中央側（右手）を **USB ケーブル** で PC に接続します。
 3. Chrome / Edge などの WebUSB 対応ブラウザで **[https://studio.dya.cormoran.works/](https://studio.dya.cormoran.works/)** を開きます。
-4. キーボード側で `BLE` レイヤー(レイヤー10/11)を有効にし、右下に配置した **`&studio_unlock`** キーを押してアンロック。
+4. LANG2 を長押しして `6 SYSTEM` レイヤーに入り、H の位置の **`&studio_unlock`** キーを押してアンロック。
 5. DYA Studio 側で「Connect」を押し、USB デバイスとして mona2 を選択。
 6. キーマップ／トラックボール設定／バッテリ履歴を編集できます。
 
@@ -37,8 +43,8 @@ DYA Studio は ZMK Studio をベースに、
 | DYA Studio モジュール 4 本を west.yml に追加 (ble-management / battery-history / settings-rpc / runtime-input-processor) | `config/west.yml` |
 | Studio 系 CONFIG (`CONFIG_ZMK_STUDIO`, `CONFIG_ZMK_BLE_MANAGEMENT`, `CONFIG_ZMK_BATTERY_HISTORY`, `CONFIG_ZMK_SETTINGS_RPC`, `CONFIG_ZMK_RUNTIME_INPUT_PROCESSOR`, `CONFIG_ZMK_RUNTIME_INPUT_PROCESSOR_STUDIO_RPC`) | `config/mona2_r.conf` |
 | トラックボール処理を Runtime Input Processor に置換 | `boards/shields/mona2/mona2.dtsi`, `mona2_r.overlay` |
-| `&studio_unlock` を `ble_win` / `ble_mac` レイヤー右上に配置 | `config/mona2.keymap` |
-| 全レイヤーに `display-name` を設定 (DYA Studio 上で `WIN / MAC / NUM_W / NUM_M / MOUSE_W / MOUSE_M / SCRL_W / SCRL_M / FN_W / FN_M / BLE_W / BLE_M` と表示) | `config/mona2.keymap` |
+| キーマップを roBa に合わせる（`&studio_unlock` は `6 SYSTEM` レイヤーの H の位置、レイヤー名は `0 BASE`〜`7 OS`） | `config/mona2.keymap` |
+| オートマウス・LANG1 長押しのスクロール・SPACE 長押しの低速を roBa に合わせる | `boards/shields/mona2/mona2_r.overlay` |
 | `studio-rpc-usb-uart` snippet (中央側) | `build.yaml` |
 
 > **Note:**
