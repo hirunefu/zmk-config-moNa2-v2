@@ -99,6 +99,8 @@
            &scroll_runtime_input_processor へ委譲する */
     };
 
+    // 左手のノブ（EC12E2440301 をクリック感なしに改造したもの、押し込みスイッチなし）。
+    // 1 周 24 パルスで、EC11 ドライバは A/B の各エッジを数えるので 24 x 4 = 96
     left_encoder: encoder_left {
         compatible = "alps,ec11";
         a-gpios = <&xiao_d 5 (GPIO_ACTIVE_HIGH | GPIO_PULL_UP)>;
@@ -107,13 +109,11 @@
         status = "disabled";
     };
 
-    right_encoder: encoder_right {
-        status = "disabled";
-    };
-
     sensors: sensors {
         compatible = "zmk,keymap-sensors";
-        sensors = <&left_encoder &right_encoder>;
+        // 左手のノブだけを並べる。並び順がセンサー番号になる（左 = 0。ノブの実行時割り当てもこの番号で引く）
+        sensors = <&left_encoder>;
+        // 360 / 24 = 15 度ごとに発火する
         triggers-per-rotation = <24>;
     };
 

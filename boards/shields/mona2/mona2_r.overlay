@@ -60,24 +60,21 @@
 };
 
 /* ─────────────────────────────────────────────────────────────
-   scroll_runtime_input_processor をスクロール変換器として上書き
-
-   デフォルトでは x-codes=HWHEEL / y-codes=WHEEL で
-   「すでにスクロールイベントになっているもの」しか処理しない設定。
-   トラックボールの生イベント(REL_X/Y) を受け取って
-   xy-to-scroll-enabled でスクロールに変換する形に切替える。
-
-   ・active-layers : デフォルトのスクロールレイヤー bitmask
-                     bit6=scroll_win, bit7=scroll_mac → 0x000000C0
-                     DYA Studio から変更可能(再ビルド不要)
-   ・xy-to-scroll-enabled : REL_X→HWHEEL, REL_Y→WHEEL に変換
-                            こちらも Studio から ON/OFF 可能
+   トラックボールのレイヤーごとの動き（roBa に合わせている）
+   ・オートマウス: ボールを動かすとレイヤー 4（MOUSE）に入り、ボールを止めて
+     10 秒たつか、MOUSE レイヤーで &trans のキーを押すまで続く
+   ・LANG1 長押し（レイヤー 3 ARROW）: ボールで縦横にスクロール
+   ・SPACE 長押し（レイヤー 2 NUM）: カーソルが 1/3 の速さ（細かい位置合わせ用）
+   ここに書いた値は初期値で、DYA Studio で変更して保存した値があればそちらが使われる
    ────────────────────────────────────────────────────── */
+
+/* スクロール: トラックボールの生の動き（REL_X/Y）を xy-to-scroll-enabled でホイールに変える。
+   どのレイヤーで使うかは下の scroller 子ノードで決めるので、active-layers は 0（制限しない） */
 &scroll_runtime_input_processor {
     x-codes = <INPUT_REL_X>;
     y-codes = <INPUT_REL_Y>;
     xy-to-scroll-enabled;
-    active-layers = <0x000000C0>;  /* layer6 + layer7 */
+    active-layers = <0>;
     scale-multiplier = <1>;
     scale-divisor = <4>;            /* スクロール速度。大きいほど遅い。Studioで調整可 */
     /* 軸ロック(縦のみ等)が欲しければ AXIS_SNAP_MODE_Y を初期値に */
@@ -86,21 +83,35 @@
     /* axis-snap-threshold = <100>; */
 };
 
-/* マウス用は全レイヤーで有効 (active-layers = 0 がデフォルト) */
+/* オートマウス */
 &mouse_runtime_input_processor {
-    /* 例: マウス感度初期値を Studio から調整したいだけならここで触らなくてOK */
+    temp-layer-enabled;
+    temp-layer = <4>;
+    /* キーコードを送るキーを押してから 300 ms は、ボールが動いてもレイヤーを有効にしない
+       （入力中に手が触れて入るのを減らす）。&lt の長押しとマウスボタンは数えない */
+    temp-layer-activation-delay-ms = <300>;
+    /* カーソルを最後に動かしてから 10 秒で解除する（クリックや LANG1 のスクロールでは延びない）。
+       DYA Studio のスライダーは 2000 ms までなので、この長さはここでしか指定できない */
+    temp-layer-deactivation-delay-ms = <10000>;
 };
 
-/* ─────────────────────────────────────────────────────────────
-   入力リスナー
-   メインチェーンに mouse → scroll の順で2段。
-   ・mouse は全レイヤーで走る(scale/invert を適用)
-   ・scroll は active-layers のレイヤーでのみ走る
-     → 該当レイヤー以外では素通しでマウスとして動作
-   scroller {} 子ノードは使わない(レイヤー固定になるため)
-   ────────────────────────────────────────────────────── */
+/* 入力リスナー
+   ・ふだんは mouse だけを通す（オートマウスもここで動く）
+   ・レイヤー 3・5 では scroller、レイヤー 2 では snipe の処理に置き換える。
+     scroller には mouse を通さないので、スクロール中にオートマウスに入らない。
+     子ノードのレイヤーは固定で、DYA Studio からは変えられない */
 &trackball_central_listener {
     status = "okay";
     device = <&trackball_central>;
-    input-processors = <&mouse_runtime_input_processor &scroll_runtime_input_processor>;
+    input-processors = <&mouse_runtime_input_processor>;
+
+    scroller {
+        layers = <3 5>;
+        input-processors = <&scroll_runtime_input_processor>;
+    };
+
+    snipe {
+        layers = <2>;
+        input-processors = <&zip_xy_scaler 1 3>, <&mouse_runtime_input_processor>;
+    };
 };
