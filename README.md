@@ -5,11 +5,14 @@
 DYA Studio は ZMK Studio をベースに、
 
 - キーマップ／レイヤーの GUI 編集
-- トラックボール (PMW3610) のスクロール量・軸反転・自動マウスレイヤーなど **Runtime Input Processor 経由での動的設定**
+- トラックボール (PAW3222) のスクロール量・軸反転・自動マウスレイヤーなど **Runtime Input Processor 経由での動的設定**
 - バッテリ履歴の閲覧
 - BLE プロファイル管理 / Settings RPC
 
 を Web から行えるようにした拡張版です。
+
+> [!NOTE]
+> このフォーク（hirunefu/zmk-config-moNa2-v2）は、右手のトラックボールを **PAW3222 専用**にしています。PMW3610 用のビルドはありません。右手には `mona2_r-paw3222`、左手には `mona2_l` で始まるファイルを書き込みます。
 
 ## キーマップ
 
@@ -44,47 +47,6 @@ DYA Studio は ZMK Studio をベースに、
 
 ---
 
-## トラックボール (COROPIT) を使用する場合
+## トラックボールの向き（PAW3222）
 
-COROPITを使用する方は以下のようにコードを編集してください。
-
-mona2_r.overlay
-
-修正前
-```
-  trackball_central: trackball_central@0 {
-        status = "okay";
-        compatible = "pixart,pmw3610";  //トラボセンサ用のドライバとバインド
-        reg = <0>;
-        spi-max-frequency = <2000000>;
-        irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; //P0.02を指定(MOTION)
-        cpi = <600>;
-        //swap-xy;
-        //invert-x; //COROPIT版ではコメントアウトを外す
-        //invert-y; //COROPIT版ではコメントアウトを外す
-        evt-type = <INPUT_EV_REL>;
-        x-input-code = <INPUT_REL_X>;
-        y-input-code = <INPUT_REL_Y>;
-    };
-};
-
-```
-**修正後**
-```
-  trackball_central: trackball_central@0 {
-        status = "okay";
-        compatible = "pixart,pmw3610";  //トラボセンサ用のドライバとバインド
-        reg = <0>;
-        spi-max-frequency = <2000000>;
-        irq-gpios = <&gpio0 2 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>; //P0.02を指定(MOTION)
-        cpi = <600>;
-        //swap-xy;
-        invert-x; //COROPIT版ではコメントアウトを外す
-        invert-y; //COROPIT版ではコメントアウトを外す
-        evt-type = <INPUT_EV_REL>;
-        x-input-code = <INPUT_REL_X>;
-        y-input-code = <INPUT_REL_Y>;
-    };
-};
-
-```
+PAW3222 のドライバには、軸の反転・入れ替えの設定がありません。向きが合わないときは、DYA Studio のトラックボール設定で X/Y の反転・入れ替え・回転を変えるか、`boards/shields/mona2/mona2_r.overlay` の `&mouse_runtime_input_processor` に初期値として `x-invert;`、`y-invert;`、`xy-swap-enabled;`、`rotation-degrees = <角度>;` を書いてください。CPI を変える場合は、`trackball_central` に `res-cpi = <値>;`（608〜4826、38 刻み）を書きます。
