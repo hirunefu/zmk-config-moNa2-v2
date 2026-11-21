@@ -63,7 +63,8 @@
         };
 
         // ノブ用: Ctrl を押したままホイールを 1 段回す（Ctrl＋ホイールと同じ、画面の拡大・縮小）。
-        // Ctrl は右 Ctrl にする（左 Ctrl の 2 度押しに反応するツールがあるため。拡大・縮小はどちらの Ctrl でも効く）。
+        // Ctrl は左 Ctrl にする。使っている PC では PowerToys の Keyboard Manager で右 Ctrl を Insert に
+        // 置き換えているので、右 Ctrl だと「Insert＋ホイール」になってただのスクロールになる。
         // &msc は押してから 16 ms ごとに「値 × 16 / 1000」段を送る。押している時間（tap-ms）を 24 ms にして、
         // 16 ms の 1 回だけ送らせる（値 100 なら 1.6 → 1 段）。ホイールを送り終えてから Ctrl を離す
         zoom_in: ZOOM_IN {
@@ -72,9 +73,9 @@
             wait-ms = <0>;
             tap-ms = <24>;
             bindings
-                = <&macro_press &kp RCTRL>
+                = <&macro_press &kp LCTRL>
                 , <&macro_tap &msc MOVE_Y(100)>
-                , <&macro_release &kp RCTRL>
+                , <&macro_release &kp LCTRL>
                 ;
         };
 
@@ -84,9 +85,9 @@
             wait-ms = <0>;
             tap-ms = <24>;
             bindings
-                = <&macro_press &kp RCTRL>
+                = <&macro_press &kp LCTRL>
                 , <&macro_tap &msc MOVE_Y(-100)>
-                , <&macro_release &kp RCTRL>
+                , <&macro_release &kp LCTRL>
                 ;
         };
     };
